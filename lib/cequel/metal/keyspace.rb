@@ -30,6 +30,8 @@ module Cequel
       attr_writer :default_consistency
       # @return [Hash] credentials for connect to cassandra
       attr_reader :credentials
+      # @return [Symbol] compression type to use
+      attr_reader :compression
 
       #
       # @!method write(statement, *bind_vars)
@@ -127,6 +129,7 @@ module Cequel
 
         @name = configuration[:keyspace]
         @default_consistency = configuration[:default_consistency].try(:to_sym)
+        @compression = configuration[:compression].try(:to_sym)
 
         # reset the connections
         clear_active_connections!
@@ -266,6 +269,7 @@ module Cequel
       def client_options
         {hosts: hosts, port: port}.tap do |options|
           options.merge!(credentials) if credentials
+          options.merge!(compression: compression) if compression
         end
       end
 

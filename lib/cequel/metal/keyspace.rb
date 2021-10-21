@@ -194,19 +194,18 @@ module Cequel
         options[:consistency] ||= default_consistency
 
         retries = max_retries
-        log('CQL', statement, *bind_vars) do
-          begin
-            client.execute(sanitize(statement, bind_vars), options)
-          rescue Cassandra::Errors::NoHostsAvailable,
-                 Ione::Io::ConnectionError => e
-            clear_active_connections!
-            raise if retries == 0
-            retries -= 1
-            sleep(retry_delay)
-            retry
-          end
+        # Removing transaction loggings as they're throwing SystemStackError for
+        # massive FullJobs updates
+        begin
+          client.execute(sanitize(statement, bind_vars), options)
+        rescue Cassandra::Errors::NoHostsAvailable,
+                Ione::Io::ConnectionError => e
+          clear_active_connections!
+          raise if retries == 0
+          retries -= 1
+          sleep(retry_delay)
+          retry
         end
-
       end
       #
       # Execute a CQL query in this keyspace with the given consistency

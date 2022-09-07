@@ -55,8 +55,6 @@ module Cequel
         end
       end
 
-      private
-
       attr_reader :keyspace
 
       def current_batch

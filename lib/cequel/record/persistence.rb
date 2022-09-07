@@ -260,8 +260,6 @@ module Cequel
         self
       end
 
-      protected
-
       def persisted!
         @persisted = true
         self
@@ -301,10 +299,8 @@ module Cequel
         @deleter ||= Metal::Deleter.new(metal_scope)
       end
 
-      private
 
       def_delegators 'self.class', :connection, :table
-      private :connection, :table
 
       def read_attribute(attribute)
         super

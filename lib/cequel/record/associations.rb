@@ -146,8 +146,6 @@ module Cequel
           def_child_association_reader(association)
         end
 
-        private
-
         def def_parent_association_accessors
           def_parent_association_reader
           def_parent_association_writer
@@ -187,8 +185,6 @@ module Cequel
           end
         end
       end
-
-      private
 
       def read_parent_association
         ivar_name = parent_association.instance_variable_name

@@ -392,11 +392,17 @@ module Cequel
       end
 
       def cast(value)
-        if value.is_a?(::String) then Time.parse(value)
+        timestamp = if value.is_a?(::String) then Time.parse(value)
         elsif value.respond_to?(:to_time) then value.to_time
         elsif value.is_a?(Numeric) then Time.at(value)
         else Time.parse(value.to_s)
-        end.utc.round(3)
+        end.utc
+
+        timestamp.change(
+          # Cassandra timestamps are stored only with millisecond precision, so
+          # truncating to 3 decimals instead of rounding them
+          usec: timestamp.nsec.to_s.slice(0, 3).ljust(6, '0')
+        )
       end
     end
     register Timestamp.instance

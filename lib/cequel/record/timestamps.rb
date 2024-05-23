@@ -37,7 +37,7 @@ module Cequel
           if type == :timeuuid && options[:auto]
             module_eval(<<-RUBY, __FILE__, __LINE__+1)
               def created_at
-                read_attribute(#{name.inspect}).try(:to_time)
+                read_attribute(#{name.inspect}).try(:to_datetime)
               end
             RUBY
           end

@@ -402,7 +402,10 @@ module Cequel
           if value.nil?
             value = empty_attributes.fetch(name.to_sym) { -> {} }.call
           end
-          @attributes[name.to_sym] = value
+          # This value comes from cassandra-driver and I simply don't want to
+          # change the timestamp instance there and have another gem fork
+          # maintained by us.
+          @attributes[name.to_sym] = value.is_a?(Time) ? value.to_datetime : value
         end
         @attributes
       end

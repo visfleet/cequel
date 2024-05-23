@@ -392,10 +392,10 @@ module Cequel
       end
 
       def cast(value)
-        timestamp = if value.is_a?(::String) then Time.parse(value)
-        elsif value.respond_to?(:to_time) then value.to_time
-        elsif value.is_a?(Numeric) then Time.at(value)
-        else Time.parse(value.to_s)
+        timestamp = if value.is_a?(::String) then DateTime.parse(value)
+        elsif value.respond_to?(:to_datetime) then value.to_datetime
+        elsif value.is_a?(Numeric) then Time.at(value).to_datetime
+        else DateTime.parse(value.to_s)
         end.utc
 
         timestamp.change(

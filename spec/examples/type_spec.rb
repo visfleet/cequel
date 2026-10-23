@@ -161,6 +161,24 @@ describe Cequel::Type do
       specify { expect(subject.cast(now.to_s)).to eq(now) }
       specify { expect(subject.cast(now.to_datetime)).to eq(now) }
       specify { expect(subject.cast(now.to_date)).to eq(now.to_date.to_time) }
+
+      context 'with sub-second precision' do
+        def cast_fraction(fraction)
+          subject.cast("2024-01-01 00:00:20.#{fraction} UTC").strftime('%S.%6N')
+        end
+
+        it 'truncates to milliseconds' do
+          expect(cast_fraction('123999')).to eq('20.123000')
+        end
+
+        it 'keeps leading zeros in the fraction' do
+          expect(cast_fraction('045123')).to eq('20.045000')
+        end
+
+        it 'drops fractions under a millisecond' do
+          expect(cast_fraction('000500')).to eq('20.000000')
+        end
+      end
     end
   end
 

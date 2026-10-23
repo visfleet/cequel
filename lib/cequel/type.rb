@@ -401,7 +401,7 @@ module Cequel
         timestamp.change(
           # Cassandra timestamps are stored only with millisecond precision, so
           # truncating to 3 decimals instead of rounding them
-          usec: timestamp.nsec.to_s.slice(0, 3).ljust(6, '0')
+          usec: timestamp.usec / 1000 * 1000
         )
       end
     end

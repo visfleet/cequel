@@ -379,7 +379,7 @@ module Cequel
 
     #
     # `timestamp` columns store timestamps. Timestamps do not include time zone
-    # data, and all input times are cast to UTC and rounded to the nearest
+    # data, and all input times are cast to UTC and truncated to the
     # millisecond before being stored.
     #
     # @see http://cassandra.apache.org/doc/cql3/CQL.html#usingdates
@@ -394,6 +394,10 @@ module Cequel
       def cast(value)
         timestamp = if value.is_a?(::String) then Time.parse(value)
         elsif value.respond_to?(:to_time) then value.to_time
+        # Going through the float's decimal representation drops its binary
+        # error, so 0.001 doesn't become 0.000999 and get truncated to 0.000
+        elsif value.is_a?(::Float) && value.finite?
+          Time.at(value.to_s.to_r)
         elsif value.is_a?(Numeric) then Time.at(value)
         else Time.parse(value.to_s)
         end.utc
@@ -401,7 +405,7 @@ module Cequel
         timestamp.change(
           # Cassandra timestamps are stored only with millisecond precision, so
           # truncating to 3 decimals instead of rounding them
-          usec: timestamp.nsec.to_s.slice(0, 3).ljust(6, '0')
+          usec: timestamp.usec / 1000 * 1000
         )
       end
     end

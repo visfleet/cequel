@@ -161,6 +161,49 @@ describe Cequel::Type do
       specify { expect(subject.cast(now.to_s)).to eq(now) }
       specify { expect(subject.cast(now.to_datetime)).to eq(now) }
       specify { expect(subject.cast(now.to_date)).to eq(now.to_date.to_time) }
+
+      context 'with sub-second precision' do
+        def cast_fraction(fraction)
+          subject.cast("2024-01-01 00:00:20.#{fraction} UTC").strftime('%S.%6N')
+        end
+
+        it 'truncates to milliseconds' do
+          expect(cast_fraction('123999')).to eq('20.123000')
+        end
+
+        it 'keeps leading zeros in the fraction' do
+          expect(cast_fraction('045123')).to eq('20.045000')
+        end
+
+        it 'drops fractions under a millisecond' do
+          expect(cast_fraction('000500')).to eq('20.000000')
+        end
+
+        it 'keeps the millisecond of a float with binary error' do
+          expect(subject.cast(1704067220.001).strftime('%S.%6N'))
+            .to eq('20.001000')
+        end
+
+        it 'does not round a float up to the next millisecond' do
+          expect(subject.cast(1704067220.1239996).strftime('%S.%6N'))
+            .to eq('20.123000')
+        end
+
+        it 'does not round a float up to the next second' do
+          expect(subject.cast(1704067220.9999995).strftime('%S.%6N'))
+            .to eq('20.999000')
+        end
+
+        it 'does not round a Rational up to the next second' do
+          rational = Rational(17_040_672_209_999_998, 10_000_000)
+          expect(subject.cast(rational).strftime('%S.%6N')).to eq('20.999000')
+        end
+
+        it 'truncates a DateTime to milliseconds' do
+          datetime = DateTime.parse('2024-01-01T00:00:20.045123Z')
+          expect(subject.cast(datetime).strftime('%S.%6N')).to eq('20.045000')
+        end
+      end
     end
   end
 

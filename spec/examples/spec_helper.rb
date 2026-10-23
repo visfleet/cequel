@@ -17,7 +17,7 @@ RSpec.configure do |config|
 
   {
     rails: ActiveSupport::VERSION::STRING,
-    cassandra: ENV.fetch('CASSANDRA_VERSION', '3.0'),
+    cassandra: ENV.fetch('CASSANDRA_VERSION', '5.0'),
   }.each do |tag, version|
     config.filter_run_excluding tag => ->(requirement) {
       !Gem::Requirement.new(requirement).
